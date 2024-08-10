@@ -8,13 +8,14 @@
                 navigator.geolocation.watchPosition(async (position) => {
                     const { latitude, longitude } = position.coords;
 
-                    await fetch('http://localhost:3000/', {
+                    await fetch('http://localhost:3000/update-location', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({ latitude, longitude }),
                     });
+                    console.log({message: 'Data sent successfully'})
                 }, (error) => {
                     console.error('Error getting location:', error);
                 });

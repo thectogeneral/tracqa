@@ -1,18 +1,20 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+import express, { Express, Request, Response } from 'express';
+import path from 'path';
+import { createClient, RedisClientType } from 'redis';
+import cors from 'cors';
 
-const express = require('express');
-const path = require('path');
-const { createClient } = require('redis');
+dotenv.config();
 
-const app = express();
+const app: Express = express();
 const client = createClient();
 const port = 3000;
 
 // Middleware to serve static files
 app.use(express.static(path.join(__dirname, 'public')));
-const cors =  require("cors");
 app.use(express.json());
 app.options("*", cors());
+
 app.use(
   cors({
     origin: "*",
@@ -28,24 +30,23 @@ app.use(
 
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-    res.render('index', { apiKey: process.env.API_KEY });
+app.get('/', (req: Request, res: Response) => {
+  res.render('index', { apiKey: process.env.API_KEY });
 });
 
-app.post('/update-location', async (req, res) => {
+app.post('/update-location', async (req: Request, res: Response) => {
   const { latitude, longitude } = req.body;
   await client.set('location', JSON.stringify({ latitude, longitude }));
   res.sendStatus(200);
 });
 
-app.get('/location', async (req, res) => {
+app.get('/location', async (req: Request, res: Response) => {
   const locationData = await client.get('location');
-  latestLocation = JSON.parse(locationData);
+  const latestLocation = locationData ? JSON.parse(locationData) : null;
   res.json(latestLocation);
 });
 
 app.listen(port, async () => {
-    await client.connect();
-    console.log(`Server running at http://localhost:${port}`);
+  await client.connect();
+  console.log(`Server running at http://localhost:${port}`);
 });
-
